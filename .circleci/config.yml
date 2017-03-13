@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/cci-demo-clojure
+    docker:
+      - image: openjdk:8
+    steps:
+      - checkout
+      - restore_cache:
+          key: << checksum "project.clj" >>
+      - run: bin/lein deps
+      - save_cache:
+          paths:
+            - $HOME/.m2
+            - $HOME/.lein
+          key: << checksum "project.clj" >>
+      - run: bin/lein do test, uberjar
+      - store_artifacts:
+          path: target/demo-uberjar.jar
+          destination: uberjar
