@@ -18,5 +18,5 @@ jobs:
           key: << checksum "project.clj" >>
       - run: bin/lein do test, uberjar
       - store_artifacts:
-          path: target/cci-demo-clojure.jar
+          path: target/uberjar/cci-demo-clojure.jar
           destination: uberjar
