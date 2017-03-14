@@ -1,18 +1,8 @@
-# CircleCI Demo Application: Clojure
+# CircleCI Demo Application: Clojure [![CircleCI](https://circleci.com/gh/circleci/cci-demo-clojure.svg?style=svg)](https://circleci.com/gh/circleci/cci-demo-clojure)
 
-A sample project using Luminous.
+This is an example application showcasing how to run a Clojure app on CircleCI 2.0.
 
-## Prerequisites
-
-You need `java` installed, but you can use the included `bin/lein` script.
-
-## Running
-
-To start a web server for the application, run:
-
-    lein run
-
-Once it launches it will be available on http://localhost:3000
+You can follow along with this project by reading the [documentation](https://circleci.com/docs/2.0/language-clojure/).
 
 ## License
 

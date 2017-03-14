@@ -4,6 +4,8 @@ jobs:
     working_directory: ~/cci-demo-clojure
     docker:
       - image: openjdk:8
+    environment:
+      LEIN_ROOT=nbd
     steps:
       - checkout
       - restore_cache:
@@ -16,5 +18,5 @@ jobs:
           key: << checksum "project.clj" >>
       - run: bin/lein do test, uberjar
       - store_artifacts:
-          path: target/demo-uberjar.jar
+          path: target/cci-demo-clojure.jar
           destination: uberjar
