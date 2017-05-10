@@ -9,13 +9,13 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: << checksum "project.clj" >>
+          key: cci-demo-clojure-{{ checksum "project.clj" }}
       - run: bin/lein deps
       - save_cache:
           paths:
-            - $HOME/.m2
-            - $HOME/.lein
-          key: << checksum "project.clj" >>
+            - ~/.m2
+            - ~/.lein
+          key: cci-demo-clojure-{{ checksum "project.clj" }}
       - run: bin/lein do test, uberjar
       - store_artifacts:
           path: target/uberjar/cci-demo-clojure.jar
