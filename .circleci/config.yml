@@ -56,7 +56,7 @@ jobs:
                     command: echo "Running snyk/scan on main; uploading the results"
                 - snyk/scan:
                     additional-arguments: "--file='pom.xml'"
-                    fail-on-issues: true
+                    fail-on-issues: false
                     severity-threshold: high
                     monitor-on-build: true
                     project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}'
@@ -69,7 +69,7 @@ jobs:
                     command: echo "Running snyk/scan on branch; not uploading the results"
                 - snyk/scan:
                     additional-arguments: "--file='pom.xml'"
-                    fail-on-issues: true
+                    fail-on-issues: false
                     severity-threshold: high
                     monitor-on-build: false
                     project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}'
