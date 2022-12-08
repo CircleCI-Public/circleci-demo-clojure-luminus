@@ -1,4 +1,14 @@
 version: 2.1
+
+orbs:
+    snyk: snyk/snyk@1.4.0
+
+workflows:
+  vulnerability-scan:
+    jobs:
+      - vulnerability-scan:
+          context: org-global-employees
+
 jobs:
   build:
     docker:
@@ -19,3 +29,48 @@ jobs:
       - store_artifacts:
           path: target/uberjar/cci-demo-clojure.jar
           destination: uberjar
+
+  vulnerability-scan:
+    docker:
+        - image: cimg/openjdk:19.0
+    steps:
+        - checkout
+        - run:
+            name: Setup Scanning
+            command: |
+                git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
+                echo "Downloading Lein..."
+                curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+                chmod +x ~/bin/lein
+                if [ -f "project.clj" ]; then
+                  echo "Generate pom.xml file..."
+                  lein pom
+                  echo "pom.xml generated"
+                fi
+        - when:
+            condition:
+                equal: [ main, << pipeline.git.branch >> ]
+            steps:
+                - run:
+                    name: Launching Snyk Orb Scanning
+                    command: echo "Running snyk/scan on main; uploading the results"
+                - snyk/scan:
+                    additional-arguments: "--file='pom.xml'"
+                    fail-on-issues: true
+                    severity-threshold: high
+                    monitor-on-build: true
+                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}'
+        - unless:
+            condition:
+                equal: [ main, << pipeline.git.branch >> ]
+            steps:
+                - run:
+                    name: Launching Snyk Orb Scanning
+                    command: echo "Running snyk/scan on branch; not uploading the results"
+                - snyk/scan:
+                    additional-arguments: "--file='pom.xml'"
+                    fail-on-issues: true
+                    severity-threshold: high
+                    monitor-on-build: false
+                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}'
+
