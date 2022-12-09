@@ -55,11 +55,11 @@ jobs:
                     name: Launching Snyk Orb Scanning
                     command: echo "Running snyk/scan on main; uploading the results"
                 - snyk/scan:
-                    #additional-arguments: "--file='pom.xml'"
+                    additional-arguments: "--file='pom.xml'"
                     fail-on-issues: false
                     severity-threshold: high
                     monitor-on-build: true
-                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}'
+                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:pom.xml'
         - unless:
             condition:
                 equal: [ main, << pipeline.git.branch >> ]
