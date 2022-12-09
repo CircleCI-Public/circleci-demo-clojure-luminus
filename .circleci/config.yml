@@ -49,13 +49,13 @@ jobs:
                 fi
         - when:
             condition:
-                equal: [ main, << pipeline.git.branch >> ]
+                equal: [ << pipeline.git.branch >>, << pipeline.git.branch >> ]
             steps:
                 - run:
                     name: Launching Snyk Orb Scanning
                     command: echo "Running snyk/scan on main; uploading the results"
                 - snyk/scan:
-                    additional-arguments: "--file='pom.xml'"
+                    #additional-arguments: "--file='pom.xml'"
                     fail-on-issues: false
                     severity-threshold: high
                     monitor-on-build: true
@@ -68,7 +68,7 @@ jobs:
                     name: Launching Snyk Orb Scanning
                     command: echo "Running snyk/scan on branch; not uploading the results"
                 - snyk/scan:
-                    additional-arguments: "--file='pom.xml'"
+                    #additional-arguments: "--file='pom.xml'"
                     fail-on-issues: false
                     severity-threshold: high
                     monitor-on-build: false
