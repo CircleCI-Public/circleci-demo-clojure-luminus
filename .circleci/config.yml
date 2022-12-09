@@ -39,17 +39,17 @@ jobs:
             name: Setup Scanning
             command: |
                 git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
-                echo "Downloading Lein..."
+                echo "→ Downloading Lein"
                 curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
                 chmod +x ~/bin/lein
                 if [ -f "project.clj" ]; then
-                  echo "Generate pom.xml file..."
+                  echo "→ Generate pom.xml file..."
                   lein pom
-                  echo "pom.xml generated"
+                  echo "done"
                 fi
         - when:
             condition:
-                equal: [ << pipeline.git.branch >>, << pipeline.git.branch >> ]
+                equal: [ main, << pipeline.git.branch >> ]
             steps:
                 - run:
                     name: Launching Snyk Orb Scanning
@@ -68,9 +68,9 @@ jobs:
                     name: Launching Snyk Orb Scanning
                     command: echo "Running snyk/scan on branch; not uploading the results"
                 - snyk/scan:
-                    #additional-arguments: "--file='pom.xml'"
+                    additional-arguments: "--file='pom.xml'"
                     fail-on-issues: false
                     severity-threshold: high
                     monitor-on-build: false
-                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}'
+                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}:pom.xml'
 
