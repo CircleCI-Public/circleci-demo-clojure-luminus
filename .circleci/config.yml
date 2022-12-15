@@ -38,6 +38,9 @@ jobs:
         - run:
             name: Setup Scanning
             command: |
+                export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')
+                echo "Base branch is: $BASE_BRANCH"
+                //echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
                 git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
                 echo "→ Downloading Lein"
                 curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
@@ -47,6 +50,10 @@ jobs:
                   lein pom
                   echo "done"
                 fi
+        - run:
+            name: Setup Scanning
+            command: |
+                echo "Base branch is: $BASE_BRANCH"
         - when:
             condition:
                 equal: [ main, << pipeline.git.branch >> ]
