@@ -54,7 +54,7 @@ jobs:
                 echo "Base branch is: $BASE_BRANCH"
         - when:
             condition:
-                equal: [ main, << pipeline.git.branch >> ]
+                equal: [ $BASE_BRANCH, << pipeline.git.branch >> ]
             steps:
                 - run:
                     name: Launching Snyk Orb Scanning
@@ -67,7 +67,7 @@ jobs:
                     project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:pom.xml'
         - unless:
             condition:
-                equal: [ main, << pipeline.git.branch >> ]
+                equal: [ $BASE_BRANCH, << pipeline.git.branch >> ]
             steps:
                 - run:
                     name: Launching Snyk Orb Scanning
