@@ -38,13 +38,14 @@ jobs:
         - run:
             name: Setup Scanning
             command: |
-                echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
+                # echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
+                echo "export BASE_BRANCH=add-vulnerability-scanning" >> "$BASH_ENV"
                 git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
                 echo "→ Downloading Lein"
                 curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
                 chmod +x ~/bin/lein
                 if [ -f "project.clj" ]; then
-                  echo "→ Generate pom.xml file..."
+                  echo "→ Generating pom.xml file..."
                   lein pom
                   echo "done"
                 fi
