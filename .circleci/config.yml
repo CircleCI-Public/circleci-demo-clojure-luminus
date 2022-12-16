@@ -39,10 +39,8 @@ jobs:
             name: Setup Scanning
             command: |
                 echo -e "→ Installing the Snyk CLI"
-                curl -L --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk-linux
-                curl -L --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux.sha256 -o ~/bin/snyk-linux.sha256
-                echo "Download successful? $(sha256sum -c ~/bin/snyk-linux.sha256)"
-                chmod +x ~/bin/snyk-linux
+                curl -L --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk
+                chmod +x ~/bin/snyk
                 echo "→ Installing Lein"
                 curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
                 chmod +x ~/bin/lein
