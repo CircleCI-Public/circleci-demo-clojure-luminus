@@ -39,10 +39,10 @@ jobs:
             name: Setup Scanning
             command: |
                 echo -e "→ Installing the Snyk CLI"
-                curl -L --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk
+                curl --progress-bar --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk
                 chmod +x ~/bin/snyk
                 echo "→ Installing Lein"
-                curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+                curl --progress-bar --retry 6 -L https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o ~/bin/lein
                 chmod +x ~/bin/lein
                 if [ -f "project.clj" ]; then
                   echo "→ Generating pom.xml file..."
@@ -52,10 +52,6 @@ jobs:
                 echo "→ Setup extra environment variables"
                 echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
                 git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
-        - run:
-            name: Setup Scanning
-            command: |
-                echo "Base branch is: $BASE_BRANCH"
         - run:
             name: Run Snyk CLI
             command: |
