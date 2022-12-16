@@ -38,10 +38,12 @@ jobs:
         - run:
             name: Setup Scanning
             command: |
-                # echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
-                echo "export BASE_BRANCH=add-vulnerability-scanning" >> "$BASH_ENV"
-                git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
-                echo "→ Downloading Lein"
+                echo -e "→ Installing the Snyk CLI"
+                curl -L --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk-linux
+                curl -L --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux.sha256 -o ~/bin/snyk-linux.sha256
+                echo "Download successful? $(sha256sum -c ~/bin/snyk-linux.sha256)"
+                chmod +x ~/bin/snyk-linux
+                echo "→ Installing Lein"
                 curl --progress-bar --retry 6 -o ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
                 chmod +x ~/bin/lein
                 if [ -f "project.clj" ]; then
@@ -49,34 +51,22 @@ jobs:
                   lein pom
                   echo "done"
                 fi
+                echo "→ Setup extra environment variables"
+                echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
+                git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
         - run:
             name: Setup Scanning
             command: |
                 echo "Base branch is: $BASE_BRANCH"
-        - when:
-            condition:
-                equal: [ $BASE_BRANCH, << pipeline.git.branch >> ]
-            steps:
-                - run:
-                    name: Launching Snyk Orb Scanning
-                    command: echo "Running snyk/scan on main; uploading the results"
-                - snyk/scan:
-                    additional-arguments: "--file='pom.xml'"
-                    fail-on-issues: false
-                    severity-threshold: high
-                    monitor-on-build: true
-                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:pom.xml'
-        - unless:
-            condition:
-                equal: [ $BASE_BRANCH, << pipeline.git.branch >> ]
-            steps:
-                - run:
-                    name: Launching Snyk Orb Scanning
-                    command: echo "Running snyk/scan on branch; not uploading the results"
-                - snyk/scan:
-                    additional-arguments: "--file='pom.xml'"
-                    fail-on-issues: false
-                    severity-threshold: high
-                    monitor-on-build: false
-                    project: '${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}:pom.xml'
-
+        - run:
+            name: Run Snyk CLI
+            command: |
+                if [ "$CIRCLE_BRANCH" = "$BASE_BRANCH" ]; then
+                    echo "Running Snyk CLI against $BASE_BRANCH and uploading results"
+                    snyk monitor --project-name="circleci/$CIRCLE_PROJECT_REPONAME:pom.xml" --org=circleci-78h --file='pom.xml'
+                    RETCODE=$?
+                else
+                    echo "Running Snyk CLI against branch $CIRCLE_BRANCH and displaying results"
+                    snyk test --severity-threshold=high --file='pom.xml'
+                    RETCODE=$?
+                fi
