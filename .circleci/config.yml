@@ -70,3 +70,4 @@ jobs:
                     snyk test --severity-threshold=high --file='pom.xml'
                     RETCODE=$?
                 fi
+                echo "return code $RETCODE"
