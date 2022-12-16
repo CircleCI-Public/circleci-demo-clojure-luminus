@@ -36,15 +36,13 @@ jobs:
             name: Setup Scanning
             command: |
                 echo -e "→ Installing the Snyk CLI"
-                curl --progress-bar --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk
-                chmod +x ~/bin/snyk
+                curl --progress-bar --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk && chmod +x ~/bin/snyk
                 echo "→ Installing Lein"
-                curl --progress-bar --retry 6 -L https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o ~/bin/lein
-                chmod +x ~/bin/lein
+                curl --progress-bar --retry 6 -L https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o ~/bin/lein && chmod +x ~/bin/lein
                 if [ -f "project.clj" ]; then
                   echo "→ Generating pom.xml file..."
                   lein pom
-                  echo "done"
+                  echo "  Done"
                 fi
                 echo "→ Setup extra environment variables"
                 echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
