@@ -1,4 +1,11 @@
 version: 2.1
+
+workflows:
+  vulnerability-scan:
+    jobs:
+      - vulnerability-scan:
+          context: org-global-employees
+
 jobs:
   build:
     docker:
@@ -19,3 +26,39 @@ jobs:
       - store_artifacts:
           path: target/uberjar/cci-demo-clojure.jar
           destination: uberjar
+
+  vulnerability-scan:
+    docker:
+        - image: cimg/openjdk:19.0
+    steps:
+        - checkout
+        - run:
+            name: Setup Scanning
+            command: |
+                if [ ! -f "project.clj" ]; then
+                  echo "→ No project.clj found, skipping"
+                  exit 0
+                fi
+                echo -e "→ Installing the Snyk CLI"
+                curl --progress-bar --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk && chmod +x ~/bin/snyk
+                echo "→ Installing Lein"
+                curl --progress-bar --retry 6 -L https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o ~/bin/lein && chmod +x ~/bin/lein
+                echo "→ Generating pom.xml file..."
+                lein pom
+                echo "→ Setup extra environment variables"
+                echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
+                git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
+        - run:
+            name: Run Snyk CLI
+            command: |
+                if [ ! -f "project.clj" ]; then
+                  echo "→ No project.clj found, skipping"
+                  exit 0
+                fi
+                if [ "$CIRCLE_BRANCH" = "$BASE_BRANCH" ]; then
+                    echo "→ Running Snyk CLI against $BASE_BRANCH and uploading results"
+                    snyk monitor --project-name="circleci/$CIRCLE_PROJECT_REPONAME:pom.xml" --org=circleci-78h --file='pom.xml'
+                else
+                    echo "→ Running Snyk CLI against branch $CIRCLE_BRANCH and displaying results"
+                    snyk test --severity-threshold=high --file='pom.xml'
+                fi
