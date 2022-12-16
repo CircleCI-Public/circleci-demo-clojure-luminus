@@ -35,6 +35,10 @@ jobs:
         - run:
             name: Setup Scanning
             command: |
+                if [ ! -f "project.clj" ]; then
+                  echo "→ No project.clj found, skipping"
+                  exit 0
+                fi
                 echo -e "→ Installing the Snyk CLI"
                 curl --progress-bar --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk && chmod +x ~/bin/snyk
                 echo "→ Installing Lein"
@@ -47,6 +51,10 @@ jobs:
         - run:
             name: Run Snyk CLI
             command: |
+                if [ ! -f "project.clj" ]; then
+                  echo "→ No project.clj found, skipping"
+                  exit 0
+                fi
                 if [ "$CIRCLE_BRANCH" = "$BASE_BRANCH" ]; then
                     echo "→ Running Snyk CLI against $BASE_BRANCH and uploading results"
                     snyk monitor --project-name="circleci/$CIRCLE_PROJECT_REPONAME:pom.xml" --org=circleci-78h --file='pom.xml'
