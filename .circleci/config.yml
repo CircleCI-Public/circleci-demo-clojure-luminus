@@ -55,9 +55,9 @@ jobs:
                   echo "→ No project.clj found, skipping"
                   exit 0
                 fi
-                if [ "$CIRCLE_BRANCH" = "$BASE_BRANCH" ]; then
+                if [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]]; then
                     echo "→ Running Snyk CLI against $BASE_BRANCH and uploading results"
-                    snyk monitor --project-name="circleci/$CIRCLE_PROJECT_REPONAME:pom.xml" --org=circleci-78h --file='pom.xml'
+                    snyk monitor --project-name="CircleCI-Public/$CIRCLE_PROJECT_REPONAME:pom.xml" --org="circleci-public" --file="pom.xml" --package-manager="maven"
                 else
                     echo "→ Running Snyk CLI against branch $CIRCLE_BRANCH and displaying results"
                     snyk test --severity-threshold=high --file='pom.xml'
