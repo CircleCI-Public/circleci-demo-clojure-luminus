@@ -41,12 +41,12 @@ jobs:
                 fi
                 echo -e "→ Installing the Snyk CLI"
                 curl --progress-bar --retry 6 -L https://static.snyk.io/cli/latest/snyk-linux -o ~/bin/snyk && chmod +x ~/bin/snyk
-                echo "→ Installing Lein"
+                echo -e "\n→ Installing Lein"
                 curl --progress-bar --retry 6 -L https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o ~/bin/lein && chmod +x ~/bin/lein
-                echo "→ Generating pom.xml file..."
+                echo -e "\n→ Generating pom.xml file..."
                 lein pom
-                echo "→ Setup extra environment variables"
-                echo "export BASE_BRANCH=$(git log --pretty=format:'%D' HEAD^ | grep 'origin/' | head -n1 | sed 's@origin/@@' | sed 's@,.*@@')" >> "$BASH_ENV"
+                echo -e "\n→ Setup extra environment variables"
+                echo "export BASE_BRANCH=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')" >> "$BASH_ENV"
                 git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com/circleci/".insteadOf "https://github.com/circleci/"
         - run:
             name: Run Snyk CLI
@@ -55,10 +55,14 @@ jobs:
                   echo "→ No project.clj found, skipping"
                   exit 0
                 fi
+                echo -e "\n→ Debugging environment variables"
+                echo "CIRCLE_BRANCH value = |$CIRCLE_BRANCH|"
+                echo "BASE_BRANCH value   = |$BASE_BRANCH|"
+                [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]] && echo "Branch & Base Equal" || echo "Branch & Base Not equal"
                 if [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]]; then
-                    echo "→ Running Snyk CLI against $BASE_BRANCH and uploading results"
+                    echo -e "\n→ Running Snyk CLI against $BASE_BRANCH and uploading results"
                     snyk monitor --project-name="CircleCI-Public/$CIRCLE_PROJECT_REPONAME:pom.xml" --org="circleci-public" --file="pom.xml" --package-manager="maven"
                 else
-                    echo "→ Running Snyk CLI against branch $CIRCLE_BRANCH and displaying results"
+                    echo -e "\n→ Running Snyk CLI against branch $CIRCLE_BRANCH and displaying results"
                     snyk test --severity-threshold=high --file='pom.xml'
                 fi
