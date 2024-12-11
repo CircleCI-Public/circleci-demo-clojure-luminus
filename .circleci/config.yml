@@ -3,7 +3,7 @@ version: 2.1
 workflows:
   vulnerability-scan:
     jobs:
-      - vulnerability-scan:
+      - scanning:
           context: org-global-employees
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
           path: target/uberjar/cci-demo-clojure.jar
           destination: uberjar
 
-  vulnerability-scan:
+  scanning:
     docker:
         - image: cimg/openjdk:19.0
     steps:
@@ -58,11 +58,5 @@ jobs:
                 echo -e "\n→ Debugging environment variables"
                 echo "CIRCLE_BRANCH value = |$CIRCLE_BRANCH|"
                 echo "BASE_BRANCH value   = |$BASE_BRANCH|"
-                [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]] && echo "Branch & Base Equal" || echo "Branch & Base Not equal"
-                if [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]]; then
-                    echo -e "\n→ Running Snyk CLI against $BASE_BRANCH and uploading results"
-                    snyk monitor --project-name="CircleCI-Public/$CIRCLE_PROJECT_REPONAME:pom.xml" --org="circleci-public" --file="pom.xml" --package-manager="maven"
-                else
-                    echo -e "\n→ Running Snyk CLI against branch $CIRCLE_BRANCH and displaying results"
-                    snyk test --severity-threshold=high --file='pom.xml'
-                fi
+                echo -e "\n→ Running Snyk CLI and displaying results"
+                snyk test --severity-threshold=high --file='pom.xml'
